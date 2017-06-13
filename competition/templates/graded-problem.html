@@ -1,0 +1,151 @@
+{% extends 'dashbase.html' %}
+
+{% block head %}
+    <title>Fix {{ problem.name }} - Employee Dashboard - New Wave Computers</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
+        .CodeMirror * {
+            font-family: 'Roboto Mono', monospace !important;
+            font-size: 14px;
+            cursor: text;
+        }
+
+        .CodeMirror.gutters, .CodeMirror-gutter {
+            cursor: default;
+        }
+
+        ul {
+            list-style: none;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                <h4>Problem</h4>
+            </div>
+            <div class="tab-group">
+                <div class="tabs">
+                    <a class="tab" href="#problem">Problem</a>
+                    <a class="tab" href="#data">Sample Data</a>
+                </div>
+                <div class="card-content">
+                    <div class="tab-content" id="problem">
+                        <p>{{ problem.text|safe|linebreaksbr }}</p>
+                    </div>
+                    <div class="tab-content" id="data">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sample Input</th>
+                                    <th>Correct Output</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test_case in problem.visible_testcase_set.all %}
+                                    <tr>
+                                        <td><code>{{ test_case.input|linebreaksbr }}</code></td>
+                                        <td><code>{{ test_case.output|linebreaksbr }}</code></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form method="post" action="{% url 'submit' problem_id=problem.full_id %}">
+            {% csrf_token %}
+            <input type="hidden" id="language" name="language" value="{{ latest_submission.get_language_display|lower|default:'java' }}">
+            <input type="hidden" id="code" name="code">
+            <div class="card">
+                <div class="card-title">
+                    <h4>Code</h4>
+                </div>
+                <div class="tab-group">
+                    <div class="tabs">
+                        <a class="tab code-tab{% if latest_submission.language == 'JV' %} active{% endif %}" href="#java-tab" data-language="java">Java</a>
+                        <a class="tab code-tab{% if latest_submission.language == 'PY' %} active{% endif %}" href="#python-tab" data-language="python">Python</a>
+                        <a class="tab code-tab{% if latest_submission.language == 'CP' %} active{% endif %}" href="#cpp-tab" data-language="cpp">C++</a>
+                    </div>
+                    <div class="tab-content" id="java-tab">
+                        <textarea id="java" data-mode="text/x-java">{% if latest_submission.language == 'JV' %}{{ latest_submission.code }}{% endif %}</textarea>
+                        <div class="card-content">
+                            <a href="https://docs.oracle.com/javase/8/docs/api/" class="button" target="_blank" style="margin-top: 0">JavaDocs</a>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="python-tab">
+                        <textarea id="python" data-mode="text/x-python">{% if latest_submission.language == 'PY' %}{{ latest_submission.code }}{% endif %}</textarea>
+                        <div class="card-content">
+                            <a href="https://docs.python.org/2/" class="button" target="_blank" style="margin-top: 0">Python Documentation</a>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="cpp-tab">
+                        <textarea id="cpp" data-mode="text/x-c++src">{% if latest_submission.language == 'CP' %}{{ latest_submission.code }}{% endif %}</textarea>
+                        <div class="card-content">
+                            <a href="http://en.cppreference.com/w/" class="button" target="_blank" style="margin-top: 0">C++ Reference</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">
+                    <h4>Submit</h4>
+                </div>
+                <div class="card-content" style="padding-top: 0">
+                    <input type="submit" class="button">
+                    <a href="{% url 'index' %}" class="button">Back to Dashboard</a>
+                </div>
+            </div>
+            {% if submissions|length > 0 %}
+                <div class="card">
+                    <div class="card-title">
+                        <h4>Previous Submissions</h4>
+                    </div>
+                    <div class="card-content">
+                        <ul>
+                            {% for submission in submissions %}
+                                <li><a href="{% url 'submission' submission_id=submission.full_id %}" target="_blank"><i class="fa fa-times-circle" aria-hidden="true"></i> Submission {{ forloop.counter }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/clike/clike.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/python/python.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/addon/edit/closebrackets.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('textarea').each(function () {
+                $(this).data('codeMirror', CodeMirror.fromTextArea(this, {
+                    mode: $(this).attr('data-mode'),
+                    lineNumbers: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true
+                }));
+            });
+
+            $('.code-tab').click(function() {
+                $('#language').val($(this).attr('data-language'));
+            });
+
+            $('form').submit(function(e) {
+                $('input[type="submit"]').hide();
+                $('#code').val($('#' + $('#language').val() + '-tab').find('textarea').data('codeMirror').getValue());
+            });
+        });
+    </script>
+{% endblock %}

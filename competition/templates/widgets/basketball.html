@@ -1,0 +1,11 @@
+{% extends 'widgets/widget.html' %}
+
+{% block widget %}
+    <label for="basketball-number">Jersey Number</label>
+    <input type="number" name="a" id="basketball-number">
+    <input type="submit" value="Check">
+{% endblock %}
+
+{% block fixed %}
+    write(form, data == 'true' ? 'Play' : 'Don\'t Play');
+{% endblock %}

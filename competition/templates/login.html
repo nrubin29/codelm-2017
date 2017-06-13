@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block head %}
+    <title>Log In - Employee Dashboard - New Wave Computers</title>
+{% endblock %}
+
+{% block body %}
+    <div class="container" style="width: 100%; display: flex; justify-content: center; align-items: center">
+        <div class="card" style="min-width: 500px">
+            <div class="card-content" style="text-align: center">
+                <img src="{% static 'logo.png' %}" width="100px">
+                <h2>New Wave Computers</h2>
+                <h3>Employee Dashboard</h3>
+                <hr>
+                <div class="tab-group">
+                    {% if settings.mode == 'P' %}
+                        <div class="tabs">
+                            <a class="tab" href="#login">Log In</a>
+                            <a class="tab" href="#register">Register</a>
+                        </div>
+                        <br>
+                    {% endif %}
+                    <div{% if settings.mode == 'P' %} class="tab-content"{% endif %} id="login">
+                        <form method="post" action="{% url 'index' %}">
+                            {% csrf_token %}
+                            {% if status == 'failure' %}
+                                <p style="color: red; margin-bottom: 0.5em">Incorrect username or password.</p>
+                            {% elif status == 'closed' %}
+                                <p style="color: red; margin-bottom: 0.5em">You cannot log in at this time.</p>
+                            {% endif %}
+                            <input type="hidden" name="type" value="login">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" style="margin: 0 auto 0.5em">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" style="margin: 0 auto 0.5em">
+                            <input type="submit" value="Log In" style="margin: 0 auto 0.5em">
+                        </form>
+                    </div>
+                    {% if settings.mode == 'P' %}
+                        <div class="tab-content" id="register">
+                            <form method="post" action="{% url 'index' %}">
+                                {% csrf_token %}
+                                {% if status == 'failure' %}
+                                    <p style="color: red; margin-bottom: 0.5em">Incorrect username or password.</p>
+                                {% elif status == 'username_taken' %}
+                                    <p style="color: red; margin-bottom: 0.5em">That username is already taken.</p>
+                                {% endif %}
+                                <input type="hidden" name="type" value="register">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" name="username" style="margin: 0 auto 0.5em">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" name="password" style="margin: 0 auto 0.5em">
+                                <label for="division">Division</label>
+                                <select id="division" name="division">
+                                    {% for division in prelim_divisions %}
+                                        <option value="{{ division.id }}">{{ division.name|cut:'Preliminaries ' }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="submit" value="Register" style="margin: 0 auto 0.5em">
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

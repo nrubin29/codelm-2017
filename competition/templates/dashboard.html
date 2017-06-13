@@ -1,0 +1,34 @@
+{% extends 'dashbase.html' %}
+{% load tags %}
+
+{% block head %}
+    <title>Employee Dashboard - New Wave Computers</title>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        {% for problem in problems %}
+            <div class="card">
+                <div class="card-title broken"{% if problem.widget == 'none' %} style="border-bottom: none"{% endif %}>
+                    {% if team|solved:problem %}
+                        <h4><a href="#">{{ problem.name }}</a></h4>
+                        <a href="{% url 'submission' submission_id=team|correct_submission_id:problem %}" class="icon">
+                            <i class="fa fa-check-circle fa-pull-right" aria-hidden="true"></i>
+                        </a>
+                    {% else %}
+                        <h4><a href="{% url 'problem' problem_id=problem.full_id %}">{{ problem.name }}</a></h4>
+                        <a href="{% url 'problem' problem_id=problem.full_id %}" class="icon">
+                            <i class="fa fa-exclamation-circle fa-pull-right" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                    <small style="display: block; margin-top: 0.25em">{{ problem.short_description }}</small>
+                </div>
+                {% if problem.widget != 'none' %}
+                    <div class="card-content">
+                        {% include problem.widget_template with problem=problem fixed=team|solved:problem %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'dashbase.html' %}
+{% load tags %}
+
+{% block head %}
+    <title>Submission for {{ submission.problem.name }} - Employee Dashboard - New Wave Computers</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
+        .CodeMirror * {
+            font-family: 'Roboto Mono', monospace !important;
+            font-size: 14px;
+            cursor: text;
+        }
+
+        .CodeMirror.gutters, .CodeMirror-gutter {
+            cursor: default;
+        }
+
+        .test-cases {
+            list-style: none;
+        }
+
+        .test-case {
+            display: inline-block;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0.25em;
+            border-radius: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                <h4>Result</h4>
+            </div>
+            <div class="card-content">
+                {% if submission.override_correct %}
+                    <h3>Override correct</h3>
+                {% elif submission.compiled %}
+                    {% if submission.all_correct %}
+                        <h3>All correct</h3>
+                    {% else %}
+                        <h3>{{ submission.percent_correct }}% correct</h3>
+                    {% endif %}
+                    <br>
+                    <ul class="test-cases">
+                        {% for test_case in submission.testcasesubmission_set.all %}
+                            <li class="test-case"><i class="fa fa-{% if test_case.correct %}check{% else %}times{% endif %}-circle" aria-hidden="true"></i> Test Case {{ forloop.counter }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <h3>Compilation error</h3>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                <h4>Code</h4>
+            </div>
+            <textarea name="code">{{ submission.code }}</textarea>
+        </div>
+        {% if submission.compiled %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>IO</h4>
+                </div>
+                <div class="card-content">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Input</th>
+                            <th>Your Output</th>
+                            <th>Correct Output</th>
+                            <th>Correct</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for test_case_sub in submission.testcasesubmission_set.all %}
+                            {% if team.user.is_staff or not test_case_sub.test_case.hidden %}
+                                <tr{% if test_case_sub.test_case.hidden %} style="background: gray"{% endif %}>
+                                    <td>{{ test_case_sub.test_case.input|linebreaksbr }}</td>
+                                    <td>{{ test_case_sub.output|linebreaksbr }}</td>
+                                    <td>{{ test_case_sub.test_case.output|linebreaksbr }}</td>
+                                    <td><i class="fa fa-{% if test_case_sub.correct %}check{% else %}times{% endif %}-circle" aria-hidden="true"></i></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Compilation Error</h4>
+                </div>
+                <textarea>{{ submission.compile_error }}</textarea>
+            </div>
+        {% endif %}
+        {% if request.user.is_staff %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Admin</h4>
+                </div>
+                <div class="card-content">
+                    <table class="table">
+                        <tr>
+                            <th>Team</th>
+                            <td>{{ submission.team }}</td>
+                        </tr>
+                        <tr>
+                            <th>Problem</th>
+                            <td>{{ submission.problem }}</td>
+                        </tr>
+                        <tr>
+                            <th>Language</th>
+                            <td>{{ submission.get_language_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Server Datetime</th>
+                            <td>{{ submission.datetime }}</td>
+                        </tr>
+                    </table>
+                    <form action="{% url 'api_edit_submission' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="submission-id" value="{{ submission.full_id }}">
+                        <input type="submit" class="button" value="Delete">
+                    </form>
+                    {% if not submission.all_correct %}
+                        <form action="{% url 'api_edit_submission' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="correct">
+                            <input type="hidden" name="submission-id" value="{{ submission.full_id }}">
+                            <input type="submit" class="button" value="Mark as Correct">
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            {% if submission.all_correct %}
+                <div class="card">
+                    <div class="card-title">
+                        <h4>Back</h4>
+                    </div>
+                    <div class="card-content" style="padding-top: 0">
+                        <a href="{% url 'index' %}" class="button">Back to Dashboard</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-title">
+                        <h4>Try Again</h4>
+                    </div>
+                    <div class="card-content" style="padding-top: 0">
+                        <a href="{% url 'problem' problem_id=submission.problem.full_id %}" class="button">Try Again</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/clike/clike.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/python/python.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/addon/edit/closebrackets.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('textarea').each(function() {
+                $(this).data('codeMirror', CodeMirror.fromTextArea(this, {
+                    mode: '{{ submission.language|lang_mode }}',
+                    readOnly: true,
+                    lineNumbers: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true
+                }));
+            });
+        });
+    </script>
+{% endblock %}

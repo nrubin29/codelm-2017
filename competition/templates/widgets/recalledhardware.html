@@ -1,0 +1,11 @@
+{% extends 'widgets/widget.html' %}
+
+{% block widget %}
+    <label for="recalled-hardware-sn">Serial Number</label>
+    <input type="text" name="a" id="recalled-hardware-sn">
+    <input type="submit">
+{% endblock %}
+
+{% block fixed %}
+    write(form, (data == 'true' ? '' : 'Don\'t ') + 'Recall');
+{% endblock %}

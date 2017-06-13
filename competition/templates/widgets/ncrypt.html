@@ -1,0 +1,11 @@
+{% extends 'widgets/widget.html' %}
+
+{% block widget %}
+    <label for="ncrypt-message">Message</label>
+    <input name="a" type="text" id="ncrypt-message">
+    <label for="ncrypt-x">X</label>
+    <input name="b" type="number" id="ncrypt-x">
+    <input type="submit" class="inline" value="e">
+    <input type="submit" class="inline" value="d">
+    <input type="hidden" name="c" class="which-submit">
+{% endblock %}

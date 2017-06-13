@@ -1,0 +1,77 @@
+{% extends 'dashbase.html' %}
+{% load staticfiles %}
+{% load tags %}
+
+{% block head %}
+    <title>Judging Panel - New Wave Computers</title>
+
+    <style>
+        ul {
+            list-style: none;
+        }
+
+        .sub-ul {
+            margin-left: 1em;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="tab-group">
+            <div class="tabs">
+                {% for division in divisions %}
+                    <a class="tab" href="#{{ division|cut:" "|lower }}-tab">{{ division }}</a>
+                {% endfor %}
+            </div>
+            <br>
+            {% for division in divisions %}
+                <div class="tab-content" id="{{ division|cut:" "|lower }}-tab">
+                    {% for team in division.teams_sorted %}
+                        <div class="card">
+                            <div class="card-title">{{ team.user.username }}</div>
+                            <div class="card-content">
+                                <div class="flex">
+                                    <div class="half">
+                                        <ul>
+                                            {% for problem, submissions in team.submissions_map.items %}
+                                                <li>
+                                                    <p><i class="fa fa-{% if team|solved:problem %}check{% else %}times{% endif %}-circle" aria-hidden="true"></i> {{ problem.name }}</p>
+                                                    <ul class="sub-ul">
+                                                        {% for submission in submissions %}
+                                                            <li><a href="{% url 'submission' submission_id=submission.full_id %}"><i class="fa fa-{% if submission.filesubmission_set %}{% if submission.judge_score == 0 %}file-code-o{% else %}check-circle{% endif %}{% elif not submission.compiled %}exclamation-circle{% elif submission.all_correct %}check-circle{% else %}times-circle{% endif %}" aria-hidden="true"></i> Submission {{ forloop.counter }}</a></li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="half">
+                                        <table class="table">
+                                            <tr>
+                                                <th>ID</th>
+                                                <td>{{ team.id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Score</th>
+                                                <td>{{ team.score }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>School</th>
+                                                <td>{{ team.school }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>People</th>
+                                                <td>{{ team.people }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

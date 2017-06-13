@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block body %}
+    <div class="sidebar">
+        <div class="container">
+            <a href="{% url 'index' %}"><img src="{% static 'logo.png' %}" width="100px"></a>
+            <h2>New Wave Computers</h2>
+            <h3>Employee Dashboard</h3>
+            <h5><span id="timer"></span></h5>
+            <hr>
+            {% if team.user.is_staff %}
+                <a class="button" href="{% url 'admin:index' %}">Admin Panel</a>
+            {% else %}
+                <i class="fa fa-user-circle fa-3x" aria-hidden="true"></i>
+                <h3>{{ team.short_name }}</h3>
+                <p>{{ team.division }} Division</p>
+                <p>{{ team.score }} Point{{ team.score|pluralize }}</p>
+                <p>{{ team.solved_problems|length }}/{{ team.division.problem_set.count }} Modules Fixed</p>
+                <a class="button" href="{{ team.starter_code }}">Download Starter Code</a>
+            {% endif %}
+            <a class="button" href="{% url 'api_logout' %}">Log Out</a>
+        </div>
+    </div>
+    <div class="main">
+        {% block main %}
+        {% endblock %}
+    </div>
+{% endblock %}

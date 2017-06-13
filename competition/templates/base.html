@@ -1,0 +1,21 @@
+{% load staticfiles %}
+{% load tags %}
+
+<html>
+    <head>
+        {% block head %}
+        {% endblock %}
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+        <script src="//use.fontawesome.com/10b16b2f31.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/countdown/2.6.0/countdown.min.js"></script>
+        {% is_not_special team as is_not_special %}
+        <script src="{% static 'platform.js' %}" id="platform-script" data-countdown="{{ countdown|default:is_not_special }}" data-ending-time="{{ team.ending_time.timestamp }}"></script>
+        {% block script %}
+        {% endblock %}
+    </body>
+</html>

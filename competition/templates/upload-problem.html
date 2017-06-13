@@ -1,0 +1,48 @@
+{% extends 'dashbase.html' %}
+
+{% block head %}
+    <title>Fix {{ problem.name }} - Employee Dashboard - New Wave Computers</title>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                <h4>Problem</h4>
+            </div>
+            <div class="card-content">
+                <p>{{ problem.text|safe|linebreaksbr }}</p>
+            </div>
+        </div>
+        <form enctype="multipart/form-data" method="post" action="{% url 'submit' problem_id=problem.full_id %}">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Files</h4>
+                </div>
+                <div class="card-content">
+                    <input type="file" name="files" multiple>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">
+                    <h4>Submit</h4>
+                </div>
+                <div class="card-content" style="padding-top: 0">
+                    <input type="submit" class="button">
+                    <a href="{% url 'index' %}" class="button">Back to Dashboard</a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            $('form').submit(function(e) {
+                $('input[type="submit"]').hide();
+            });
+        });
+    </script>
+{% endblock %}

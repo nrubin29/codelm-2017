@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block head %}
+    <title>End - Employee Dashboard - New Wave Computers</title>
+
+    <style>
+        .container {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            width: 650px;
+            min-width: 650px;
+        }
+
+        .card:first-child {
+            margin-right: 1em;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-content {
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <div class="card-content">
+                <img src="{% static 'logo.png' %}" width="100px">
+                <h2>New Wave Computers</h2>
+                <h3>Employee Dashboard</h3>
+                <hr>
+                <a href="https://www.youtube.com/watch?v=HtPK5VwweZ4" class="button" target="_blank">Intro Video</a>
+                <a href="#" class="button">Pictures (Coming Soon)</a>
+            </div>
+            <div class="tab-group">
+                <div class="tabs">
+                    <a class="tab" href="#intermediate">Intermediate</a>
+                    <a class="tab" href="#advanced">Advanced</a>
+                    <a class="tab" href="#expert">Expert</a>
+                </div>
+                <div class="card-content">
+                    <div class="tab-content" id="intermediate">
+                        <a href="{% static 'questions/questions-intermediate.pdf' %}" class="button" target="_blank" style="margin-top: 0">Questions</a>
+                        <a href="{% static 'sampledata/intermediate-sample-data.pdf' %}" class="button" target="_blank">Hidden Sample Data</a>
+                        <a href="{% static 'solutions/intermediate-solutions.zip' %}" class="button" target="_blank">Solutions (Python)</a>
+                    </div>
+                    <div class="tab-content" id="advanced">
+                        <a href="{% static 'questions/questions-advanced.pdf' %}" class="button" target="_blank" style="margin-top: 0">Questions</a>
+                        <a href="{% static 'sampledata/advanced-sample-data.pdf' %}" class="button" target="_blank">Hidden Sample Data</a>
+                        <a href="{% static 'solutions/advanced-solutions.zip' %}" class="button" target="_blank">Solutions (Python)</a>
+                        <a href="#" class="button">Combination Lock Graphics (Coming Soon)</a>
+                    </div>
+                    <div class="tab-content" id="expert">
+                        <a href="{% static 'questions/questions-expert.pdf' %}" class="button" target="_blank" style="margin-top: 0">Questions</a>
+                        <a href="{% static 'sampledata/expert-sample-data.pdf' %}" class="button" target="_blank">Hidden Sample Data</a>
+                        <a href="{% static 'solutions/expert-solutions.zip' %}" class="button" target="_blank">Solutions (Python)</a>
+                        <a href="#" class="button">Combination Lock Graphics (Coming Soon)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                <h4>Final Scores</h4>
+            </div>
+            <div class="tab-group">
+                <div class="tabs">
+                    <a class="tab" href="#int">Intermediate</a>
+                    <a class="tab" href="#adv">Advanced</a>
+                    <a class="tab" href="#exp">Expert</a>
+                </div>
+                <div class="card-content">
+                    {% for division in divisions %}
+                        <div class="tab-content" id="{{ division.name|slice:':3'|lower }}">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for team in division.teams_sorted %}
+                                        <tr>
+                                            <td>{{ team.user.username }}</td>
+                                            <td>{{ team.score }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'dashbase.html' %}
+{% load tags %}
+
+{% block head %}
+    <title>Submission for {{ submission.problem.name }} - Employee Dashboard - New Wave Computers</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
+        .CodeMirror * {
+            font-family: 'Roboto Mono', monospace !important;
+            font-size: 14px;
+            cursor: text;
+        }
+
+        .CodeMirror.gutters, .CodeMirror-gutter {
+            cursor: default;
+        }
+
+        ul {
+            list-style: none;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                <h4>Files</h4>
+            </div>
+            <div class="card-content">
+                <ul>
+                    {% for file in submission.filesubmission_set.all %}
+                        <li><i class="fa fa-file-code-o" aria-hidden="true"></i> {{ file.file_name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% for file in submission.filesubmission_set.all %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>{{ file.file_name }}</h4>
+                </div>
+                <textarea>{{ file.code }}</textarea>
+                <div class="card-content">
+                    <a href="{% url 'api_file' file_id=file.id %}" download="{{ file.file_name }}" class="button button-file" style="margin-top: 0">Download</a>
+                </div>
+            </div>
+        {% endfor %}
+        {% if request.user.is_staff %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Admin</h4>
+                </div>
+                <div class="card-content">
+                    <table class="table">
+                        <tr>
+                            <th>Team</th>
+                            <td>{{ submission.team }}</td>
+                        </tr>
+                        <tr>
+                            <th>Problem</th>
+                            <td>{{ submission.problem }}</td>
+                        </tr>
+                        <tr>
+                            <th>Server Datetime</th>
+                            <td>{{ submission.datetime }}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <form action="{% url 'api_edit_submission' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="score">
+                        <input type="hidden" name="submission-id" value="{{ submission.full_id }}">
+                        <label for="run-score">Run Score</label>
+                        <input type="number" name="run-score" id="run-score" value="{{ submission.run_score }}">
+                        <label for="judge-score">Judge Score</label>
+                        <input type="number" name="judge-score" id="judge-score" value="{{ submission.judge_score }}">
+                        <input type="submit" class="button" value="Update Scores">
+                    </form>
+                    <form action="{% url 'api_edit_submission' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="submission-id" value="{{ submission.full_id }}">
+                        <input type="submit" class="button" value="Delete">
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-title">
+                    <h4>Back</h4>
+                </div>
+                <div class="card-content" style="padding-top: 0">
+                    <a href="{% url 'index' %}" class="button">Back to Dashboard</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('textarea').each(function() {
+                $(this).data('codeMirror', CodeMirror.fromTextArea(this, {
+                    mode: 'text',
+                    readOnly: true,
+                    lineNumbers: true
+                }));
+            });
+        });
+    </script>
+{% endblock %}

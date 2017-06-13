@@ -1,0 +1,43 @@
+<div class="widget flex">
+    <div class="half">
+        <form data-problem-id="{{ problem.id }}">
+            {% csrf_token %}
+            <input type="hidden" name="problem-id" value="{{ problem.id }}">
+            {% block widget %}
+            {% endblock %}
+        </form>
+    </div>
+    <div class="half">
+        <div class="log"></div>
+    </div>
+</div>
+
+<script>
+    function write(form, text) {
+        form.closest('.widget').find('.log').html(text);
+    }
+
+    $(document).ready(function() {
+        var form = $('form[data-problem-id={{ problem.id }}]');
+
+        form.find('input[type="submit"]').click(function() {
+            form.find('input.which-submit').val($(this).val());
+        });
+
+        form.submit(function(e) {
+            e.preventDefault();
+
+            {% if fixed %}
+                write(form, 'Loading...');
+
+                $.post('{% url 'api_widget' %}', form.serialize(), function(data) {
+                    {% block fixed %}
+                        write(form, data);
+                    {% endblock %}
+                });
+            {% else %}
+                write(form, '<p style="color: red">This widget is broken.</p>');
+            {% endif %}
+        });
+    });
+</script>
